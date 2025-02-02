@@ -55,7 +55,6 @@ class ScrapeTarget:
         while True:
             value = random.uniform(0, 100)
             self.metric.set(value)
-            logging.info(f"{int(time.time() * 1000)} - Metric updated: port={self.port}, metric={self.metric._name}, value={value:.2f}")
             time.sleep(1)
 
 class LoadGenerator:
@@ -77,6 +76,7 @@ class LoadGenerator:
             thread = threading.Thread(target=target.start, daemon=True)
             threads.append(thread)
             thread.start()
+            logging.info(f"Scrape target started on port {port} with metric name {metric_name}.")
 
         # Keep the main thread alive
         while True:
@@ -87,5 +87,8 @@ if __name__ == "__main__":
     generator = LoadGenerator()
     try:
         generator.run()
-    except KeyboardInterrupt:
-        logging.info("Load generator interrupted. Exiting.")
+    except InterruptedError as e:
+        logging.error(f"Load generator interrupted. Exiting. Error: {e}")
+    except Exception as e:
+        logging.error(f"Load generator interrupted. Exiting. Error: {e}")
+
